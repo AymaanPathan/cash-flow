@@ -80,12 +80,11 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'playto',
         'USER': 'postgres',
-        'PASSWORD': 'password',
+        'PASSWORD': 'aymaan',
         'HOST': 'localhost',
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
