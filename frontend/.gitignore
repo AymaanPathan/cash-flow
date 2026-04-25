@@ -1,0 +1,83 @@
+# dependencies
+
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# build output
+
+dist/
+dist-ssr/
+build/
+.out/
+.next/
+.nuxt/
+.svelte-kit/
+
+# cache
+
+.cache/
+.parcel-cache/
+.vite/
+.eslintcache
+.stylelintcache
+.tmp/
+.temp/
+.turbo/
+
+# environment
+
+.env
+.env.*
+!.env.example
+
+# testing
+
+coverage/
+.nyc_output/
+
+# typescript
+
+*.tsbuildinfo
+
+# logs
+
+logs/
+*.log
+*.pid
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# editor
+
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+
+# system
+
+.DS_Store
+Thumbs.db
+
+# misc
+
+*.local
+
+# hosting
+
+.vercel/
+.netlify/
+firebase-debug.log
