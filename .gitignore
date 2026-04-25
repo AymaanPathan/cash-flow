@@ -1,0 +1,28 @@
+# python
+
+venv/
+**pycache**/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# django
+
+db.sqlite3
+
+# env
+
+.env
+.env.*
+
+# node
+
+node_modules/
+dist/
+build/
+
+# system
+
+.DS_Store
+Thumbs.db
