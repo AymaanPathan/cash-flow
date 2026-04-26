@@ -7,6 +7,7 @@ import BalanceCard from "../components/BalanceCard";
 import PayoutForm from "../components/PayoutForm";
 import PayoutTable from "../components/PayoutTable";
 import LedgerTable from "../components/LedgerTable";
+import { usePayoutStream } from "../hooks/usePayoutStream";
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
@@ -20,6 +21,8 @@ export default function DashboardPage() {
   useEffect(() => {
     if (selectedId) dispatch(fetchPayouts(selectedId));
   }, [selectedId, dispatch]);
+
+  usePayoutStream(selectedId);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">

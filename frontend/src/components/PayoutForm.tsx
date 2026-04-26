@@ -6,8 +6,6 @@ import {
   clearCreateError,
   clearLastCreated,
 } from "../store/slice/payoutSlice";
-import { fetchBalance, fetchLedger } from "../store/slice/merchantSlice";
-import { fetchPayouts } from "../store/slice/payoutSlice";
 
 export default function PayoutForm() {
   const dispatch = useAppDispatch();
@@ -38,12 +36,6 @@ export default function PayoutForm() {
         setSuccess(false);
         dispatch(clearLastCreated());
       }, 3000);
-      // Refresh balance and payout list
-      if (selectedId) {
-        dispatch(fetchBalance(selectedId));
-        dispatch(fetchPayouts(selectedId));
-        dispatch(fetchLedger(selectedId));
-      }
     }
   }, [lastCreated]);
 

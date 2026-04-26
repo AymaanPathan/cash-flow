@@ -61,6 +61,16 @@ const payoutSlice = createSlice({
     clearLastCreated(state) {
       state.lastCreated = null;
     },
+
+    updatePayoutFromStream(state, action) {
+      const incoming = action.payload;
+      const idx = state.list.findIndex((p) => p.id === incoming.id);
+      if (idx !== -1) {
+        state.list[idx] = { ...state.list[idx], ...incoming };
+      } else {
+        state.list = [incoming, ...state.list];
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -105,5 +115,6 @@ const payoutSlice = createSlice({
   },
 });
 
-export const { clearCreateError, clearLastCreated } = payoutSlice.actions;
+export const { clearCreateError, clearLastCreated, updatePayoutFromStream } =
+  payoutSlice.actions;
 export default payoutSlice.reducer;

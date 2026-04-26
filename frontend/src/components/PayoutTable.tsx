@@ -1,34 +1,17 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchPayouts, refreshPayout } from "../store/slice/payoutSlice";
+import { fetchPayouts } from "../store/slice/payoutSlice";
 import StatusBadge from "./StatusBadge";
 
 export default function PayoutTable() {
   const dispatch = useAppDispatch();
   const { selectedId } = useAppSelector((s) => s.merchants);
   const { list: payouts, loading } = useAppSelector((s) => s.payouts);
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!selectedId) return;
     dispatch(fetchPayouts(selectedId));
   }, [selectedId]);
-
-  // Poll pending/processing payouts for live status updates
-  useEffect(() => {
-    if (pollingRef.current) clearInterval(pollingRef.current);
-
-    pollingRef.current = setInterval(() => {
-      const active = payouts.filter(
-        (p) => p.status === "pending" || p.status === "processing",
-      );
-      active.forEach((p) => dispatch(refreshPayout(p.id)));
-    }, 3000);
-
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-    };
-  }, [payouts, dispatch]);
 
   const fmt = (iso: string) =>
     new Date(iso).toLocaleString("en-IN", {
