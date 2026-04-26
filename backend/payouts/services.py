@@ -1,4 +1,3 @@
-from .tasks import process_pending_payout
 from django.db import transaction, IntegrityError, OperationalError
 from django.db.models import Sum, Q
 from django.db.models.functions import Coalesce
@@ -115,7 +114,7 @@ def create_payout(
     except Exception:
         idem_key.delete()
         raise
-
+    from .tasks import process_pending_payout
     process_pending_payout.apply_async(
         args=[str(payout.id)],
         countdown=1,  
