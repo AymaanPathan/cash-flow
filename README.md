@@ -16,3 +16,5 @@ python manage.py loaddata seed.json
 
 # run server
 python manage.py runserver
+
+celery -A core worker --loglevel=info --pool=solo

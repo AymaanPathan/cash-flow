@@ -28,7 +28,8 @@ def get_merchant_balance(merchant) -> dict:
         total=Coalesce(Sum("amount_paise"), Value(0, output_field=BigIntegerField()))
     )["total"]
 
-    available = total_credits - total_debits
+    available = total_credits - total_debits - held
+
 
     return {
         "available_balance_paise": available,

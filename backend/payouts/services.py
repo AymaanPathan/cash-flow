@@ -62,11 +62,15 @@ def create_payout(
     try:
         with transaction.atomic():
             try:
-                merchant_locked = (
-                    Merchant.objects.select_for_update(nowait=True).get(pk=merchant.pk)
-                )
+                with transaction.atomic():  # savepoint prevents poisoned transaction
+                    merchant_locked = (
+                        Merchant.objects.select_for_update(nowait=True).get(pk=merchant.pk)
+                    )
             except OperationalError:
-                idem_key.delete()
+                try:
+                    idem_key.delete()
+                except Exception:
+                    pass
                 raise InsufficientFundsError(
                     "Another payout is being processed. Please retry."
                 )
@@ -93,7 +97,10 @@ def create_payout(
             available = credits - debits - held
 
             if amount_paise > available:
-                idem_key.delete()
+                try:
+                    idem_key.delete()
+                except Exception:
+                    pass
                 raise InsufficientFundsError(
                     f"Insufficient funds. Available: {available} paise, requested: {amount_paise} paise."
                 )
@@ -109,16 +116,25 @@ def create_payout(
             idem_key.status = IdempotencyKey.COMPLETE
             idem_key.save(update_fields=["payout", "status"])
 
-    except (InsufficientFundsError, IdempotencyConflictError):
+    except (InsufficientFundsError, IdempotencyConflictError) as e:
+        if isinstance(e, InsufficientFundsError):
+            try:
+                IdempotencyKey.objects.filter(merchant=merchant, key=idempotency_key).delete()
+            except Exception:
+                pass
         raise
     except Exception:
-        idem_key.delete()
+        try:
+            IdempotencyKey.objects.filter(merchant=merchant, key=idempotency_key).delete()
+        except Exception:
+            pass
         raise
+
     _push_payout_event(payout)
     from .tasks import process_pending_payout
     process_pending_payout.apply_async(
         args=[str(payout.id)],
-        countdown=1,  
+        countdown=1,
     )
 
     return payout, True
