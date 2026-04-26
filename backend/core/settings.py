@@ -1,7 +1,5 @@
-GRIP_DISABLE = True
 from pathlib import Path
 import os
-from celery.schedules import crontab 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,14 +21,19 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
+    "channels",
     "payouts",
     "ledger",
     "merchants",
-    "django_eventstream",
 ]
 
-EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoModelStorage"
-
+ASGI_APPLICATION = "core.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [("localhost", 6379)]},
+    }
+}
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -39,7 +42,6 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django_grip.GripMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -103,7 +105,7 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG  
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000"
 ).split(",")
@@ -120,7 +122,6 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
     "idempotency-key",
 ]
-
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],

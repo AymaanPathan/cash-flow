@@ -15,6 +15,6 @@ python manage.py migrate
 python manage.py loaddata seed.json
 
 # run server
-python manage.py runserver
+daphne -p 8000 core.asgi:application
 
 celery -A core worker --loglevel=info --pool=solo

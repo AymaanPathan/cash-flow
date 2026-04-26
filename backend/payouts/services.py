@@ -175,26 +175,24 @@ def transition_payout(payout: Payout, new_status: str, failure_reason: str = "")
 
 
 def _push_payout_event(payout: Payout):
-    """
-    Push a real-time update to the merchant's SSE channel.
-    Channel name is scoped per merchant so each dashboard
-    only receives its own updates.
-    """
     try:
-        from django_eventstream import send_event
-        send_event(
-            channel=f"merchant-{payout.merchant_id}",
-            event_type="payout_update",
-            data={
-                "id": str(payout.id),
-                "status": payout.status,
-                "amount_paise": payout.amount_paise,
-                "amount_inr": f"{payout.amount_paise / 100:.2f}",
-                "failure_reason": payout.failure_reason,
-                "attempt_count": payout.attempt_count,
-                "updated_at": payout.updated_at.isoformat(),
-                "completed_at": payout.completed_at.isoformat() if payout.completed_at else None,
+        from asgiref.sync import async_to_sync
+        from channels.layers import get_channel_layer
+        async_to_sync(get_channel_layer().group_send)(
+            f"merchant_{payout.merchant_id}",
+            {
+                "type": "payout_update",
+                "data": {
+                    "id": str(payout.id),
+                    "status": payout.status,
+                    "amount_paise": payout.amount_paise,
+                    "amount_inr": f"{payout.amount_paise / 100:.2f}",
+                    "failure_reason": payout.failure_reason,
+                    "attempt_count": payout.attempt_count,
+                    "updated_at": payout.updated_at.isoformat(),
+                    "completed_at": payout.completed_at.isoformat() if payout.completed_at else None,
+                },
             },
         )
-    except Exception:
-        pass 
+    except Exception as e:
+        print(f"[WS] push failed: {e}")
