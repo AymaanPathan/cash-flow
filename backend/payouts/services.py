@@ -114,6 +114,7 @@ def create_payout(
     except Exception:
         idem_key.delete()
         raise
+    _push_payout_event(payout)
     from .tasks import process_pending_payout
     process_pending_payout.apply_async(
         args=[str(payout.id)],
@@ -126,7 +127,7 @@ def create_payout(
 def transition_payout(payout: Payout, new_status: str, failure_reason: str = "") -> Payout:
     if not payout.can_transition_to(new_status):
         raise InvalidTransitionError(
-            f"Cannot transition payout {payout.id} from {payout.status!r} to {new_status!r}."
+            f"Cannot transition {payout.id} from {payout.status!r} to {new_status!r}."
         )
 
     payout.status = new_status
@@ -137,9 +138,13 @@ def transition_payout(payout: Payout, new_status: str, failure_reason: str = "")
     elif new_status in (Payout.COMPLETED, Payout.FAILED):
         payout.completed_at = timezone.now()
 
-    payout.save(update_fields=["status", "failure_reason", "processing_started_at", "completed_at", "updated_at"])
+    payout.save(update_fields=[
+        "status", "failure_reason",
+        "processing_started_at", "completed_at", "updated_at"
+    ])
 
     if new_status == Payout.COMPLETED:
+        from ledger.models import LedgerEntry
         LedgerEntry.objects.create(
             merchant=payout.merchant,
             entry_type=LedgerEntry.DEBIT,
@@ -148,5 +153,32 @@ def transition_payout(payout: Payout, new_status: str, failure_reason: str = "")
             payout=payout,
         )
 
+    _push_payout_event(payout)
 
     return payout
+
+
+def _push_payout_event(payout: Payout):
+    """
+    Push a real-time update to the merchant's SSE channel.
+    Channel name is scoped per merchant so each dashboard
+    only receives its own updates.
+    """
+    try:
+        from django_eventstream import send_event
+        send_event(
+            channel=f"merchant-{payout.merchant_id}",
+            event_type="payout_update",
+            data={
+                "id": str(payout.id),
+                "status": payout.status,
+                "amount_paise": payout.amount_paise,
+                "amount_inr": f"{payout.amount_paise / 100:.2f}",
+                "failure_reason": payout.failure_reason,
+                "attempt_count": payout.attempt_count,
+                "updated_at": payout.updated_at.isoformat(),
+                "completed_at": payout.completed_at.isoformat() if payout.completed_at else None,
+            },
+        )
+    except Exception:
+        pass 

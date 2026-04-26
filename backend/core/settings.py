@@ -25,7 +25,11 @@ INSTALLED_APPS = [
     "payouts",
     "ledger",
     "merchants",
+    "django_eventstream",
 ]
+
+EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoStorage"
+
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
