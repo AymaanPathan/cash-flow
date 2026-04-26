@@ -1,3 +1,4 @@
+GRIP_DISABLE = True
 from pathlib import Path
 import os
 from celery.schedules import crontab 
@@ -28,7 +29,7 @@ INSTALLED_APPS = [
     "django_eventstream",
 ]
 
-EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoStorage"
+EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoModelStorage"
 
 
 MIDDLEWARE = [
@@ -38,6 +39,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_grip.GripMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]

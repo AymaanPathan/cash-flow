@@ -10,4 +10,5 @@ urlpatterns = [
     path("api/v1/merchants/<uuid:pk>/ledger/", MerchantLedgerView.as_view(), name="merchant-ledger"),
     path("api/v1/payouts/", include("payouts.urls")),
      path("events/<channel>/", include(django_eventstream.urls)),
+     path("api/v1/events/<channel>/", include(django_eventstream.urls)),
 ]
