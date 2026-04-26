@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useAppDispatch } from "../store/hooks";
 import { updatePayoutFromStream } from "../store/slice/payoutSlice";
-import { fetchBalance } from "../store/slice/merchantSlice";
+import { fetchBalance, fetchLedger } from "../store/slice/merchantSlice";
 
 export function usePayoutStream(merchantId: string | null) {
   const dispatch = useAppDispatch();
@@ -20,6 +20,7 @@ export function usePayoutStream(merchantId: string | null) {
       dispatch(updatePayoutFromStream(payout));
       if (payout.status === "completed" || payout.status === "failed") {
         dispatch(fetchBalance(merchantId));
+        dispatch(fetchLedger(merchantId));
       }
     };
 
