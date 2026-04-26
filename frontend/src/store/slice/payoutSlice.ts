@@ -97,8 +97,6 @@ const payoutSlice = createSlice({
       .addCase(createPayout.fulfilled, (state, action) => {
         state.creating = false;
         state.lastCreated = action.payload;
-        // Prepend new payout to list
-        state.list = [action.payload, ...state.list];
       })
       .addCase(createPayout.rejected, (state, action) => {
         state.creating = false;

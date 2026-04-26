@@ -5,61 +5,27 @@ import { fetchBalance } from "../store/slice/merchantSlice";
 
 export function usePayoutStream(merchantId: string | null) {
   const dispatch = useAppDispatch();
-  const esRef = useRef<EventSource | null>(null);
-  const merchantIdRef = useRef<string | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    if (!merchantId) {
-      esRef.current?.close();
-      esRef.current = null;
-      merchantIdRef.current = null;
-      return;
-    }
+    if (!merchantId) return;
 
-    // Don't reconnect if same merchant and connection is still open
-    if (
-      merchantIdRef.current === merchantId &&
-      esRef.current?.readyState === EventSource.OPEN
-    ) {
-      return;
-    }
+    const ws = new WebSocket(`ws://localhost:8000/ws/merchant/${merchantId}/`);
+    wsRef.current = ws;
 
-    // Close previous connection
-    esRef.current?.close();
+    ws.onopen = () => console.log("[WS] connected");
 
-    const url = `${import.meta.env.VITE_API_URL}/events/merchant-${merchantId}/`;
-    console.log("[SSE] Connecting to", url);
-
-    const es = new EventSource(url);
-    esRef.current = es;
-    merchantIdRef.current = merchantId;
-
-    es.onopen = () => {
-      console.log("[SSE] Connection open for merchant", merchantId);
-    };
-
-    es.addEventListener("payout_update", (e: MessageEvent) => {
-      console.log("[SSE] payout_update received", e.data);
-      try {
-        const payout = JSON.parse(e.data);
-        dispatch(updatePayoutFromStream(payout));
-        if (payout.status === "completed" || payout.status === "failed") {
-          dispatch(fetchBalance(merchantId));
-        }
-      } catch (err) {
-        console.error("[SSE] Failed to parse event", err);
+    ws.onmessage = (e) => {
+      const payout = JSON.parse(e.data);
+      dispatch(updatePayoutFromStream(payout));
+      if (payout.status === "completed" || payout.status === "failed") {
+        dispatch(fetchBalance(merchantId));
       }
-    });
-
-    es.onerror = (err) => {
-      console.warn("[SSE] Connection error", err, "readyState:", es.readyState);
     };
 
-    return () => {
-      console.log("[SSE] Cleanup — closing connection");
-      es.close();
-      esRef.current = null;
-      merchantIdRef.current = null;
-    };
+    ws.onerror = (e) => console.error("[WS] error", e);
+    ws.onclose = () => console.log("[WS] closed");
+
+    return () => ws.close();
   }, [merchantId, dispatch]);
 }
