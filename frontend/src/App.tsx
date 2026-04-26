@@ -1,9 +1,11 @@
-function App() {
+import { Provider } from "react-redux";
+import { store } from "./store/store";
+import DashboardPage from "./pages/DashboardPage";
+
+export default function App() {
   return (
-    <>
-      <h1 className="text-green-500 underline">Welcome to Vite</h1>
-    </>
+    <Provider store={store}>
+      <DashboardPage />
+    </Provider>
   );
 }
-
-export default App;
