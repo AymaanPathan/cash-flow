@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchMerchants } from "../store/merchantSlice";
-import { fetchPayouts } from "../store/payoutSlice";
+import { fetchMerchants } from "../store/slice/merchantSlice";
+import { fetchPayouts } from "../store/slice/payoutSlice";
 import MerchantSelector from "../components/MerchantSelector";
 import BalanceCard from "../components/BalanceCard";
 import PayoutForm from "../components/PayoutForm";

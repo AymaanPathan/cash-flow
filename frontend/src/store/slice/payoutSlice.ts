@@ -36,6 +36,7 @@ export const createPayout = createAsyncThunk(
       const res = await payoutsApi.create(payload);
       return res.data;
     } catch (err: any) {
+      console.log("Create payout error", err);
       const message = err.response?.data?.error || "Failed to create payout";
       return rejectWithValue(message);
     }
