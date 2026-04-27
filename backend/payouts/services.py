@@ -189,6 +189,7 @@ def _push_payout_event(payout: Payout):
                     "amount_inr": f"{payout.amount_paise / 100:.2f}",
                     "failure_reason": payout.failure_reason,
                     "attempt_count": payout.attempt_count,
+                    "created_at": payout.created_at.isoformat(),
                     "updated_at": payout.updated_at.isoformat(),
                     "completed_at": payout.completed_at.isoformat() if payout.completed_at else None,
                 },
