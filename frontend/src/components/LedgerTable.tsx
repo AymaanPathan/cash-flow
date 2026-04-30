@@ -12,90 +12,260 @@ export default function LedgerTable() {
     if (selectedId) dispatch(fetchLedger(selectedId));
   }, [selectedId]);
 
-  const fmt = (iso: string) =>
-    new Date(iso).toLocaleString("en-IN", {
+  const fmt = (iso: string) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleString("en-IN", {
       day: "2-digit",
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
 
   if (ledgerLoading && ledger.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 animate-pulse">
-        <div className="h-3 bg-gray-100 rounded w-24 mb-4" />
+      <div
+        style={{
+          background: "var(--bg-surface)",
+          borderRadius: "12px",
+          border: "1px solid var(--border)",
+          padding: "20px",
+        }}
+      >
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-10 bg-gray-50 rounded-xl mb-2" />
+          <div
+            key={i}
+            style={{
+              height: "44px",
+              background: "var(--bg-elevated)",
+              borderRadius: "8px",
+              marginBottom: "8px",
+              animation: "pulse 2s infinite",
+            }}
+          />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">
-          Ledger
-        </h2>
-        <span className="text-xs text-gray-400">{ledger.length} entries</span>
+    <div
+      style={{
+        background: "var(--bg-surface)",
+        borderRadius: "12px",
+        border: "1px solid var(--border)",
+        overflow: "hidden",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          padding: "14px 20px",
+          borderBottom: "1px solid var(--border)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "8px",
+              background: "rgba(245,158,11,0.1)",
+              border: "1px solid rgba(245,158,11,0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect
+                x="2"
+                y="2"
+                width="10"
+                height="10"
+                rx="2"
+                stroke="#f59e0b"
+                strokeWidth="1.5"
+              />
+              <path
+                d="M5 5h4M5 7h4M5 9h2"
+                stroke="#f59e0b"
+                strokeWidth="1"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <span
+            style={{
+              fontFamily: "'Syne', sans-serif",
+              fontSize: "13px",
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Ledger
+          </span>
+        </div>
+        <div
+          style={{
+            fontSize: "10px",
+            fontFamily: "'DM Mono', monospace",
+            color: "var(--text-muted)",
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border)",
+            padding: "3px 10px",
+            borderRadius: "100px",
+          }}
+        >
+          {ledger.length} entries
+        </div>
       </div>
 
       {ledger.length === 0 ? (
-        <div className="px-6 py-10 text-center text-gray-400 text-sm">
-          No ledger entries yet.
+        <div style={{ padding: "48px 20px", textAlign: "center" }}>
+          <div style={{ fontSize: "28px", marginBottom: "12px", opacity: 0.3 }}>
+            ◻
+          </div>
+          <div
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "12px",
+              color: "var(--text-muted)",
+            }}
+          >
+            No ledger entries yet
+          </div>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr className="bg-gray-50 text-xs text-gray-400 uppercase tracking-wider">
-                <th className="px-6 py-3 text-left font-semibold">Type</th>
-                <th className="px-6 py-3 text-left font-semibold">Amount</th>
-                <th className="px-6 py-3 text-left font-semibold">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-left font-semibold">Date</th>
+              <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                {["Type", "Amount", "Description", "Date"].map((h) => (
+                  <th
+                    key={h}
+                    style={{
+                      padding: "10px 16px",
+                      textAlign: "left",
+                      fontFamily: "'Syne', sans-serif",
+                      fontSize: "9px",
+                      fontWeight: 700,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "var(--text-muted)",
+                      background: "var(--bg-elevated)",
+                    }}
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
-              {ledger.map((entry) => (
-                <tr
-                  key={entry.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-3">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold ${
-                        entry.entry_type === "credit"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-red-50 text-red-700"
-                      }`}
+            <tbody>
+              {ledger.map((entry, i) => {
+                const isCredit = entry.entry_type === "credit";
+                return (
+                  <tr
+                    key={entry.id}
+                    style={{
+                      borderBottom:
+                        i < ledger.length - 1
+                          ? "1px solid var(--border)"
+                          : "none",
+                      transition: "background 0.1s",
+                    }}
+                    onMouseEnter={(e) =>
+                      ((e.currentTarget as HTMLElement).style.background =
+                        "var(--bg-hover)")
+                    }
+                    onMouseLeave={(e) =>
+                      ((e.currentTarget as HTMLElement).style.background =
+                        "transparent")
+                    }
+                  >
+                    <td style={{ padding: "12px 16px" }}>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          padding: "3px 10px",
+                          borderRadius: "100px",
+                          fontSize: "10px",
+                          fontFamily: "'DM Mono', monospace",
+                          fontWeight: 500,
+                          background: isCredit
+                            ? "rgba(20,184,166,0.1)"
+                            : "rgba(244,63,94,0.1)",
+                          border: `1px solid ${isCredit ? "rgba(20,184,166,0.2)" : "rgba(244,63,94,0.2)"}`,
+                          color: isCredit
+                            ? "var(--accent-cyan)"
+                            : "var(--accent-rose)",
+                        }}
+                      >
+                        <span style={{ fontSize: "12px", lineHeight: 1 }}>
+                          {isCredit ? "↑" : "↓"}
+                        </span>
+                        {isCredit ? "Credit" : "Debit"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <span
+                        style={{
+                          fontFamily: "'DM Mono', monospace",
+                          fontSize: "13px",
+                          fontWeight: 500,
+                          color: isCredit
+                            ? "var(--accent-cyan)"
+                            : "var(--accent-rose)",
+                          letterSpacing: "-0.01em",
+                        }}
+                      >
+                        {isCredit ? "+" : "−"}₹
+                        {Number(entry.amount_inr).toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </span>
+                    </td>
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        fontFamily: "'DM Mono', monospace",
+                        fontSize: "11px",
+                        color: "var(--text-secondary)",
+                        maxWidth: "240px",
+                      }}
                     >
-                      {entry.entry_type === "credit" ? "↑ Credit" : "↓ Debit"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 font-mono font-semibold text-gray-900">
-                    <span
-                      className={
-                        entry.entry_type === "credit"
-                          ? "text-emerald-600"
-                          : "text-red-600"
-                      }
+                      <span
+                        style={{
+                          display: "block",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {entry.description || "—"}
+                      </span>
+                    </td>
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        fontFamily: "'DM Mono', monospace",
+                        fontSize: "11px",
+                        color: "var(--text-muted)",
+                        whiteSpace: "nowrap",
+                      }}
                     >
-                      {entry.entry_type === "credit" ? "+" : "-"}₹
-                      {Number(entry.amount_inr).toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-gray-500 text-xs max-w-xs truncate">
-                    {entry.description || "—"}
-                  </td>
-                  <td className="px-6 py-3 text-gray-400 text-xs">
-                    {fmt(entry.created_at)}
-                  </td>
-                </tr>
-              ))}
+                      {fmt(entry.created_at)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
